@@ -1,0 +1,15 @@
+torch
+transformers
+vllm
+numpy
+pandas
+pyarrow
+scikit-learn
+lancedb
+duckdb
+matplotlib
+sentence-transformers
+pyyaml
+tqdm
+captum
+openai

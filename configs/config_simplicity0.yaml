@@ -1,0 +1,51 @@
+################################################################################
+# Addition-fusion EviGen with simplicity_loss_weight = 0
+# Identical to configs/config.yaml except simplicity_loss_weight is disabled.
+################################################################################
+
+emb_dim: 4096
+
+num_queries: 8
+num_note_queries: 4
+num_code_queries: 4
+
+k_retrieval: 4
+attn_temperature: 1.0
+use_sampling_retrieval: FALSE
+init_temperature: 1.5
+final_temperature: 0.05
+temp_anneal_epochs: 2
+
+aggregator: "mean"
+transformer_layers: 1
+transformer_heads: 8
+transformer_dim_ff: 2048
+dropout: 0.1
+
+expert_hidden_dim: 1024
+
+num_epochs: 15
+batch_size: 16
+lr: 0.001
+weight_decay: 0.01
+warmup_steps: 500
+
+aux_loss_weight: 0.01
+# Disabled: queries are normalized in every forward path, so this term has
+# no effect on predictions.
+simplicity_loss_weight: 0.0
+
+max_grad_norm: null
+
+note_parquet: "/hpc/dctrl/fl105/EviGen/death_age_chunksize200_qwen.parquet"
+code_parquet: "/hpc/dctrl/fl105/EviGen/death_age_codes_qwen.parquet"
+
+db_uri: "/hpc/dctrl/fl105/EviGen/"
+note_table: "death_age_chunksize200_qwen"
+code_table: "death_age_codes_qwen"
+
+train_set_ratio: 0.8
+random_state: 42
+
+device: "cuda"
+seed: 42

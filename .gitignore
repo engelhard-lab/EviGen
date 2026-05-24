@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Model checkpoints
+checkpoints/
+outputs/*
+!outputs/*.json
+!outputs/checkpoints/
+outputs/checkpoints/*
+!outputs/checkpoints/*.json
+data/*.csv
+legacy/*.ipynb
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Personal work log
+WORKLOG.md
+Result_LLM_baseline.md
+CLAUDE.md
+FUTURE_WORK.md
+FAITHFULNESS_EVALUATION.md
+PROTECTED_ENV_STATUS.md
+
+# SLURM job scripts (environment-specific)
+jobs/*.sh

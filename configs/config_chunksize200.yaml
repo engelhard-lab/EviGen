@@ -1,0 +1,151 @@
+################################################################################
+# Embedding & query configuration
+################################################################################
+
+# Dimension of note/code embeddings (Qwen-8B embedding size)
+emb_dim: 4096
+
+# Total number of query vectors in the model (0 .. num_queries-1)
+#  - Query 0: shared note query, always on, only retrieves notes
+#  - 1..(num_note_queries-1): additional note queries
+#  - num_note_queries..(num_queries-1): code queries
+num_queries: 8
+
+# Number of note queries (including the shared q_0)
+# These queries retrieve only from NOTE embeddings.
+num_note_queries: 4
+
+# Number of code queries
+# These queries retrieve only from CODE embeddings.
+# Must satisfy: num_note_queries + num_code_queries == num_queries
+num_code_queries: 4
+
+
+################################################################################
+# Retrieval mechanism (IRIS-style retrieval over notes/codes)
+################################################################################
+
+# How many chunks per query to retrieve (top-K or sampled)
+k_retrieval: 4
+
+# Softmax temperature used in IRIS-style linear attention when aggregating
+# the K retrieved chunks for each query.
+attn_temperature: 1.0
+
+# Whether to use sampling-based retrieval (softmax over chunks) instead of
+# hard top-K based on similarity.
+use_sampling_retrieval: FALSE
+
+# Initial temperature for sampling-based retrieval (high = more exploration)
+init_temperature: 1.5
+
+# Final temperature for sampling-based retrieval after annealing
+# (low = more greedy / deterministic).
+final_temperature: 0.05
+
+# Number of epochs over which to linearly anneal retrieval temperature
+# from init_temperature to final_temperature.
+# Temperature is updated PER BATCH over (temp_anneal_epochs * batches_per_epoch) steps.
+# After annealing completes, switches to hard (deterministic) retrieval.
+temp_anneal_epochs: 2
+
+
+################################################################################
+# Patient summary encoder (used to build note/code summaries for gating)
+################################################################################
+
+# How to aggregate note/code chunks into a patient-level summary vector:
+#   "mean"        = masked mean pooling over chunks
+#   "transformer" = TransformerEncoder over chunks, then masked mean pooling
+aggregator: "mean"
+
+# Only used if aggregator == "transformer"
+transformer_layers: 1      # Number of TransformerEncoder layers
+transformer_heads: 8       # Number of attention heads
+transformer_dim_ff: 2048   # Hidden dimension (feedforward layer) in Transformer
+dropout: 0.1               # Dropout rate used in Transformer & experts
+
+
+################################################################################
+# Per-query expert network (MoE-like heads for each query)
+################################################################################
+
+# Hidden dimension of per-query expert MLP:
+#   Linear(d -> expert_hidden_dim) -> GELU -> Dropout -> Linear(expert_hidden_dim -> d)
+expert_hidden_dim: 1024
+
+
+################################################################################
+# Optimization settings (training loop)
+################################################################################
+
+# Number of training epochs
+num_epochs: 15
+
+# Batch size in terms of patients
+batch_size: 16
+
+# Learning rate for AdamW optimizer
+lr: 0.001
+
+# Weight decay (L2 regularization) for AdamW
+weight_decay: 0.01
+
+# Number of warmup steps for learning rate:
+#   - LR linearly increases from 0 to lr over warmup_steps
+#   - then stays constant at lr afterwards
+warmup_steps: 500
+
+# Weight of the auxiliary MoE loss (diversity + simplicity) on query vectors
+aux_loss_weight: 0.01
+
+# Weight for the simplicity term in the auxiliary loss
+# Total aux loss = diversity + simplicity_loss_weight * simplicity
+# Set to 0.0 to disable simplicity loss (recommended since queries are normalized)
+simplicity_loss_weight: 1.0
+
+# Gradient clipping threshold (L2 norm). Set to null/None to disable clipping.
+max_grad_norm: null
+
+
+################################################################################
+# Dataset configuration
+################################################################################
+
+# Parquet file paths for training data
+# Columns expected in note_parquet:
+#   - subject_id (int)
+#   - vector (list/array of length emb_dim)
+#   - label (float: 0 or 1)
+# Columns expected in code_parquet:
+#   - subject_id (int)
+#   - vector (list/array of length emb_dim)
+note_parquet: "/hpc/dctrl/fl105/EviGen/death_age_chunksize200_qwen.parquet"
+code_parquet: "/hpc/dctrl/fl105/EviGen/death_age_codes_qwen.parquet"
+
+# LanceDB configuration (only used for visualization after training)
+db_uri: "/hpc/dctrl/fl105/EviGen/"
+note_table: "death_age_chunksize200_qwen"
+code_table: "death_age_codes_qwen"
+
+# Train / (val+test) split ratio at subject level
+train_set_ratio: 0.8
+
+# Random seed used for train/val/test splitting
+random_state: 42
+
+
+################################################################################
+# Miscellaneous (device & reproducibility)
+################################################################################
+
+# "cuda" or "cpu"
+# If you set "cuda" but no GPU is available, the code will automatically fall
+# back to CPU and print a warning.
+device: "cuda"
+
+# Global random seed used for:
+#   - Python random
+#   - NumPy
+#   - PyTorch (CPU & CUDA)
+seed: 42

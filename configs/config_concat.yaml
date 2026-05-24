@@ -1,0 +1,68 @@
+################################################################################
+# Embedding & query configuration
+################################################################################
+
+emb_dim: 4096
+
+num_queries: 8
+num_note_queries: 4
+num_code_queries: 4
+
+################################################################################
+# Retrieval mechanism
+################################################################################
+
+k_retrieval: 4
+attn_temperature: 1.0
+use_sampling_retrieval: FALSE
+init_temperature: 1.5
+final_temperature: 0.05
+temp_anneal_epochs: 2
+
+################################################################################
+# Patient summary encoder
+################################################################################
+
+aggregator: "mean"
+transformer_layers: 1
+transformer_heads: 8
+transformer_dim_ff: 2048
+dropout: 0.1
+
+################################################################################
+# Per-query expert network
+################################################################################
+
+expert_hidden_dim: 1024
+
+################################################################################
+# Optimization settings
+################################################################################
+
+num_epochs: 15
+batch_size: 16
+lr: 0.001
+weight_decay: 0.01
+warmup_steps: 500
+aux_loss_weight: 0.01
+simplicity_loss_weight: 1.0
+max_grad_norm: null
+
+################################################################################
+# Dataset configuration
+################################################################################
+
+note_parquet: "/hpc/dctrl/fl105/EviGen/death_age_chunksize200_qwen.parquet"
+code_parquet: "/hpc/dctrl/fl105/EviGen/death_age_codes_qwen.parquet"
+db_uri: "/hpc/dctrl/fl105/EviGen/"
+note_table: "death_age_chunksize200_qwen"
+code_table: "death_age_codes_qwen"
+train_set_ratio: 0.8
+random_state: 42
+
+################################################################################
+# Miscellaneous
+################################################################################
+
+device: "cuda"
+seed: 42

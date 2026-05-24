@@ -1,0 +1,40 @@
+CRITICAL ADDENDUM FOR REASONING-MODEL OUTPUTS (read before writing the report):
+
+You are a reasoning model. Your synthesis instinct is ON. For this clinical-report task you MUST split your work into two distinct modes and follow them strictly:
+
+MODE A — REASONING (use this freely): selecting WHICH 5 factors to write about, deciding their order, writing the [Reasoning Lens] synthesis paragraph, and writing the per-factor Reasoning sentences. In Mode A you may synthesize, weigh, and draw broad inferences within the bounds the task allows.
+
+MODE B — VERBATIM COPY (use this for every quote and every citation): you are NOT writing in your own words. You are a transcription tool. Open the quote mark, COPY characters from the source one-by-one, close the quote mark. Then COPY the (note_id: …) or (ICD code: …) handle character-for-character from one of the handles shown in the input above.
+
+Hard rules for Mode B (the verbatim parts):
+
+1. SINGLE CONTIGUOUS SPAN. The text between the opening `"` and the closing `"` MUST be a single contiguous substring of the source as shown in the input. Do NOT splice non-adjacent passages with `...`. Do NOT insert `[...]`. Do NOT join two ideas from different parts of the same note. If you want to reference two non-adjacent passages, write them as TWO separate factors (factor i and factor i+1), each with its own contiguous quote.
+
+2. CHARACTER-BY-CHARACTER COPY. Inside the quote marks, every character — including punctuation, capitalization, whitespace patterns, abbreviations, and apparent typos — must match the source. Do NOT silently fix grammar, normalize spacing, expand abbreviations, or change `Hgb-7.0*` to `Hgb 7.0`. If the source says `PMH - DM, HTN, HLD` then the quote says `PMH - DM, HTN, HLD`, not `PMH: DM, HTN, HLD`.
+
+3. NO SECTION-HEADER INVENTION. If the source contains the substring `Wound Care: keep the wound vac dressing clean`, you may quote `Wound Care: keep the wound vac dressing clean`. You may NOT quote `Wound Care: keep the wound vac dressing clean. Physical Therapy: activity as tolerated` unless those two clauses appear adjacent to each other in the source. Inventing the second header label that the source did not place adjacent is a fabrication.
+
+4. HANDLE FIDELITY. Every `(note_id: XXXXX)` and `(ICD code: XXXXX-X)` you cite MUST exactly match one of the handles shown in the input. Do NOT shorten, complete, or invent note_ids. Do NOT swap one subject's note_id for another. If after writing a factor you realize you cannot find a handle in the input that matches the quote's source, OMIT THE FACTOR.
+
+5. OMIT RATHER THAN GUESS. If you cannot find a 10–30 character contiguous span in the source that supports the point you wanted to make, do NOT paraphrase or compress. Pick a different point — one for which a verbatim span exists — or omit the factor entirely. A report with 4 verbatim-grounded factors is far better than a report with 5 factors of which one is fabricated.
+
+6. NO SYNTHESIS INSIDE QUOTE MARKS. The character sequence between `"` and `"` is a TRANSCRIPTION. Synthesis goes in the per-factor Reasoning sentence (which comes AFTER the quoted evidence) and in [Reasoning Lens]. Do not mix them.
+
+Examples:
+
+  GOOD (single contiguous verbatim span):
+    Supporting evidence: "PMH - DM, HTN, HLD PSH - none" (note_id: 17490921-DS-19)
+
+  BAD (multi-span splicing — fabrication):
+    Supporting evidence: "Wound Care: keep the wound vac dressing clean ... Physical Therapy: activity as tolerated" (note_id: 17490921-DS-21)
+       ^ the two clauses are NOT adjacent in the source
+
+  BAD (paraphrase — fabrication):
+    Supporting evidence: "Patient has poorly controlled diabetes mellitus" (note_id: 17490921-DS-19)
+       ^ source says "PMH - DM"; "poorly controlled" was added
+
+  BAD (fabricated handle):
+    Supporting evidence: "decreased renal function" (note_id: 17490921-DS-99)
+       ^ no note_id 17490921-DS-99 was shown in the input
+
+Apply Mode B to: every `Supporting evidence:` line, every citation handle. Apply Mode A to: factor selection, factor ordering, Reasoning sentences, Reasoning Lens, Recommendations.
