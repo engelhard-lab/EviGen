@@ -1,4 +1,4 @@
-"""Binary verbalizer zeroshot baseline for one-year mortality prediction.
+"""Binary verbalizer full_context baseline for one-year mortality prediction.
 
 Instead of asking the LLM to output a free-form probability, we ask it to
 answer "Yes" or "No" for whether the patient will die within one year, then
@@ -8,7 +8,7 @@ The prompt uses assistant prefill: the assistant turn starts with "Answer: "
 so the model's first generated token is at the Yes/No decision position.
 After the Yes/No token, the model freely generates a summary/explanation.
 
-Uses the same dataset and truncation logic as run_zeroshot.py.
+Uses the same dataset and truncation logic as run_full_context.py.
 """
 
 import argparse
@@ -22,7 +22,7 @@ from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
 # Reuse truncation helpers from the free-form script
-from run_zeroshot import fit_prompt_to_budget, _iter_balanced_json_objects
+from run_full_context import fit_prompt_to_budget, _iter_balanced_json_objects
 
 
 def parse_report_from_completion(raw_text: str) -> str:
@@ -177,7 +177,7 @@ def build_chat_prompt(tokenizer, patient_text: str,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=str, required=True,
-                        help="Path to zeroshot_test_patients.jsonl")
+                        help="Path to full_context_test_patients.jsonl")
     parser.add_argument("--output", type=str, required=True,
                         help="Path to write predictions JSONL")
     parser.add_argument("--model-id", type=str,
@@ -247,9 +247,9 @@ def main():
 
     # Monkey-patch the build_chat_prompt used by fit_prompt_to_budget
     # so truncation uses our verbalizer prompt (with prefill), not the free-form one.
-    import run_zeroshot
-    _orig_build = run_zeroshot.build_chat_prompt
-    run_zeroshot.build_chat_prompt = lambda tok, pt, enable_thinking=None: build_chat_prompt(
+    import run_full_context
+    _orig_build = run_full_context.build_chat_prompt
+    run_full_context.build_chat_prompt = lambda tok, pt, enable_thinking=None: build_chat_prompt(
         tok, pt, pos_str, neg_str, enable_thinking=enable_thinking
     )
 
@@ -274,7 +274,7 @@ def main():
         })
 
     # Restore original
-    run_zeroshot.build_chat_prompt = _orig_build
+    run_full_context.build_chat_prompt = _orig_build
 
     tok_counts = [m["num_input_tokens"] for m in meta]
     n_trunc = sum(1 for m in meta if m["truncated"])

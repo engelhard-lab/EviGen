@@ -4,11 +4,11 @@ Reads an IG explanation JSON (one record per patient with top-k attributed
 retrieved items, produced by ``scripts/explain.py``) and prompts a local
 Llama-3.1-Instruct model via vLLM to produce a structured 4-section clinical
 report. Writes a predictions JSONL whose schema matches
-``outputs/zeroshot/predictions_*.jsonl`` so ``scripts/eval_faithfulness.py``
+``outputs/full_context/predictions_*.jsonl`` so ``scripts/eval_faithfulness.py``
 consumes it without changes.
 
 Ported from /hpc/group/engelhardlab/hsb26/IRIS-PSRM-3/scripts/01_generate_gold_outputs.py
-(API-based) and from baselines/zeroshot/run_zeroshot.py (vLLM batching).
+(API-based) and from baselines/full_context/run_full_context.py (vLLM batching).
 
 Usage:
     python -u src/evigen_dynamicquery/generate_gold_outputs.py \\

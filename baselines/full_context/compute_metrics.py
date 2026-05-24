@@ -1,7 +1,7 @@
-"""Compute AUC and accuracy for the zeroshot baseline predictions.
+"""Compute AUC and accuracy for the full_context baseline predictions.
 
-Reads outputs/zeroshot/predictions*.jsonl, extracts parsed probabilities
-against true labels, and writes outputs/zeroshot/metrics*.json.
+Reads outputs/full_context/predictions*.jsonl, extracts parsed probabilities
+against true labels, and writes outputs/full_context/metrics*.json.
 """
 
 import argparse
@@ -20,7 +20,7 @@ from sklearn.metrics import (
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=str, required=True,
-                        help="Predictions JSONL from run_zeroshot.py")
+                        help="Predictions JSONL from run_full_context.py")
     parser.add_argument("--output", type=str, required=True,
                         help="Path to write metrics JSON")
     parser.add_argument("--threshold", type=float, default=0.5)

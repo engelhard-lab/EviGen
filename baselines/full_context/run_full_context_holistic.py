@@ -1,20 +1,20 @@
-"""Holistic zero-shot prompt variant for one-year mortality prediction.
+"""Holistic full-context prompt variant for one-year mortality prediction.
 
-Same input as ``run_zeroshot.py`` (full patient history: notes + ICD codes),
+Same input as ``run_full_context.py`` (full patient history: notes + ICD codes),
 same JSON output schema, but the model is asked for a single prose
 explanation + recommendation instead of a numbered top-5 factor list. Used
 to isolate the contribution of factor-by-factor structure: identical model,
 identical history, only the report shape differs.
 
-The parser is re-used verbatim from ``run_zeroshot`` since the output
+The parser is re-used verbatim from ``run_full_context`` since the output
 envelope is still ``{"probability": <float>, "report": "<text>"}``.
 """
 
 from __future__ import annotations
 
-# Reuse the JSON+regex extraction logic from the canonical zeroshot module
+# Reuse the JSON+regex extraction logic from the canonical full_context module
 # so the two variants cannot drift on parsing edge cases.
-from baselines.zeroshot.run_zeroshot import parse_completion  # noqa: F401
+from baselines.full_context.run_full_context import parse_completion  # noqa: F401
 
 
 SYSTEM_PROMPT = (

@@ -1,7 +1,7 @@
 """Paired bootstrap CIs on AUC/accuracy across all methods + precision/recall.
 
 Loads per-subject predictions for the five methods reported in WORKLOG
-(4 zeroshot variants + EviGen), aligns them on subject_id over the
+(4 full_context variants + EviGen), aligns them on subject_id over the
 canonical 1,340-patient test split, and computes:
 
 - Point estimates per method: AUC (parsed-only and with fallback), accuracy,
@@ -14,7 +14,7 @@ canonical 1,340-patient test split, and computes:
   95% CI on the AUC gap — the empirical one-sided significance test for the
   headline comparison in the paper.
 
-For zeroshot methods, unparsed predictions (only 8B free-form has any) are
+For full_context methods, unparsed predictions (only 8B free-form has any) are
 assigned fallback_prob=0.5 so all methods share the same 1,340 paired
 subjects. This matches compute_metrics.py's auc_all_with_fallback.
 """
@@ -32,17 +32,17 @@ from sklearn.metrics import (
 )
 
 METHODS = [
-    ("zeroshot_8b_freeform",
-     "outputs/zeroshot/predictions_full.jsonl",
+    ("full_context_8b_freeform",
+     "outputs/full_context/predictions_full.jsonl",
      "parsed_probability"),
-    ("zeroshot_70b_freeform",
-     "outputs/zeroshot/predictions_70b_full.jsonl",
+    ("full_context_70b_freeform",
+     "outputs/full_context/predictions_70b_full.jsonl",
      "parsed_probability"),
-    ("zeroshot_8b_verbalizer",
-     "outputs/zeroshot/predictions_verbalizer_full.jsonl",
+    ("full_context_8b_verbalizer",
+     "outputs/full_context/predictions_verbalizer_full.jsonl",
      "parsed_probability"),
-    ("zeroshot_70b_verbalizer",
-     "outputs/zeroshot/predictions_verbalizer_70b_full.jsonl",
+    ("full_context_70b_verbalizer",
+     "outputs/full_context/predictions_verbalizer_70b_full.jsonl",
      "parsed_probability"),
     ("rag_8b_freeform",
      "outputs/rag/predictions_full.jsonl",
@@ -57,11 +57,11 @@ METHODS = [
      "outputs/rag/predictions_verbalizer_70b_full.jsonl",
      "parsed_probability"),
     # gpt-4o-mini variants (May 2026)
-    ("zeroshot_mini_freeform",
-     "outputs/zeroshot/predictions_mini_full.jsonl",
+    ("full_context_mini_freeform",
+     "outputs/full_context/predictions_mini_full.jsonl",
      "parsed_probability"),
-    ("zeroshot_mini_verbalizer",
-     "outputs/zeroshot/predictions_verbalizer_mini_full.jsonl",
+    ("full_context_mini_verbalizer",
+     "outputs/full_context/predictions_verbalizer_mini_full.jsonl",
      "parsed_probability"),
     ("rag_mini_freeform",
      "outputs/rag/predictions_mini_full.jsonl",
@@ -71,11 +71,11 @@ METHODS = [
      "parsed_probability"),
     # Qwen3-32B variants (free-form runs in thinking mode; verbalizer
     # runs with thinking disabled so position-0 = Yes/No).
-    ("zeroshot_qwen3_32b_freeform",
-     "outputs/zeroshot/predictions_qwen3_32b_full.jsonl",
+    ("full_context_qwen3_32b_freeform",
+     "outputs/full_context/predictions_qwen3_32b_full.jsonl",
      "parsed_probability"),
-    ("zeroshot_qwen3_32b_verbalizer",
-     "outputs/zeroshot/predictions_verbalizer_qwen3_32b_full.jsonl",
+    ("full_context_qwen3_32b_verbalizer",
+     "outputs/full_context/predictions_verbalizer_qwen3_32b_full.jsonl",
      "parsed_probability"),
     ("rag_qwen3_32b_freeform",
      "outputs/rag/predictions_qwen3_32b_full.jsonl",
@@ -84,7 +84,7 @@ METHODS = [
      "outputs/rag/predictions_verbalizer_qwen3_32b_full.jsonl",
      "parsed_probability"),
     ("evigen",
-     "outputs/zeroshot/evigen_test_predictions.jsonl",
+     "outputs/full_context/evigen_test_predictions.jsonl",
      "probability"),
     # New learned baselines (April 2026)
     ("static_iris",
@@ -128,7 +128,7 @@ def main():
     )
     parser.add_argument(
         "--output", type=str,
-        default="outputs/zeroshot/bootstrap_metrics_with_rag.json",
+        default="outputs/full_context/bootstrap_metrics_with_rag.json",
     )
     parser.add_argument("--n-bootstrap", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=42)

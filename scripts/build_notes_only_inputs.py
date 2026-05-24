@@ -3,7 +3,7 @@ controlled faithfulness ablation.
 
 Produces three new files:
 
-    data/zeroshot_test_patients_notes_only.jsonl
+    data/full_context_test_patients_notes_only.jsonl
     data/rag_test_patients_notes_only.jsonl
     outputs/test_explanations_notes_only.json
 
@@ -33,7 +33,7 @@ ZS_CODES_RE = re.compile(
     flags=re.DOTALL,
 )
 # IMPORTANT: leave a stub `===== DIAGNOSTIC CODES (oldest -> newest, N=0) =====`
-# header in place. baselines/zeroshot/run_zeroshot.py:_parse_patient_text bails
+# header in place. baselines/full_context/run_full_context.py:_parse_patient_text bails
 # out (returning empty notes_blocks, disabling truncation) if either the
 # CLINICAL NOTES or DIAGNOSTIC CODES delimiter is missing. Without a stub,
 # long-history patients produce prompts >131K tokens and vLLM errors with
@@ -49,7 +49,7 @@ RAG_CODES_RE = re.compile(
 # construction), so we strip cleanly without a stub.
 
 
-def strip_zeroshot(in_path: Path, out_path: Path) -> dict:
+def strip_full_context(in_path: Path, out_path: Path) -> dict:
     n_total = n_with_codes = 0
     pre_tokens = post_tokens = 0
     with in_path.open() as fin, out_path.open("w") as fout:
@@ -57,7 +57,7 @@ def strip_zeroshot(in_path: Path, out_path: Path) -> dict:
             r = json.loads(line)
             text = r["patient_text"]
             # Replace the codes section with a stub header (no body) so that
-            # run_zeroshot.py's note-truncation parser still finds both the
+            # run_full_context.py's note-truncation parser still finds both the
             # CLINICAL NOTES and DIAGNOSTIC CODES delimiters. Without the
             # stub the parser bails out and disables truncation, producing
             # >131K-token prompts on long-history patients.
@@ -77,7 +77,7 @@ def strip_zeroshot(in_path: Path, out_path: Path) -> dict:
             fout.write(json.dumps(r) + "\n")
             n_total += 1
     return {
-        "name": "zeroshot",
+        "name": "full_context",
         "in": str(in_path), "out": str(out_path),
         "records": n_total,
         "records_with_codes_stripped": n_with_codes,
@@ -148,9 +148,9 @@ def filter_evigen(in_path: Path, out_path: Path) -> dict:
 def main():
     inputs = [
         (
-            PROJECT_DIR / "data" / "zeroshot_test_patients.jsonl",
-            PROJECT_DIR / "data" / "zeroshot_test_patients_notes_only.jsonl",
-            strip_zeroshot,
+            PROJECT_DIR / "data" / "full_context_test_patients.jsonl",
+            PROJECT_DIR / "data" / "full_context_test_patients_notes_only.jsonl",
+            strip_full_context,
         ),
         (
             PROJECT_DIR / "data" / "rag_test_patients.jsonl",

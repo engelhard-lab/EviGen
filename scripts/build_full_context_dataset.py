@@ -1,10 +1,10 @@
-"""Build the zeroshot-baseline per-patient input dataset for the test split.
+"""Build the full_context-baseline per-patient input dataset for the test split.
 
 For every test subject (same split as training: random_state=42, stratified on
 label, 80/10/10), this script pulls the patient's full note history and ICD
 code history from the raw CSVs in data/, sorts them into chronological order,
 formats them into a single LLM-ready text block, and writes one JSON line per
-patient to data/zeroshot_test_patients.jsonl.
+patient to data/full_context_test_patients.jsonl.
 
 Runs CPU-only (safe for biostat-gpu sbatch). Uses DuckDB for streaming
 CSV/parquet reads so peak RAM stays well under 32GB.
@@ -219,7 +219,7 @@ def main():
         default=None,
         help=(
             "Output JSONL path. Ignored when --split all (files are derived "
-            "from --output-dir). Defaults to data/zeroshot_{split}_patients.jsonl."
+            "from --output-dir). Defaults to data/full_context_{split}_patients.jsonl."
         ),
     )
     parser.add_argument(
@@ -248,13 +248,13 @@ def main():
                 cfg,
                 note_csv,
                 code_csv,
-                out_dir / f"zeroshot_{split}_patients.jsonl",
+                out_dir / f"full_context_{split}_patients.jsonl",
             )
     else:
         out_path = (
             Path(args.output)
             if args.output
-            else Path(args.output_dir) / f"zeroshot_{args.split}_patients.jsonl"
+            else Path(args.output_dir) / f"full_context_{args.split}_patients.jsonl"
         )
         build_split(args.split, cfg, note_csv, code_csv, out_path)
 

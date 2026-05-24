@@ -1,6 +1,6 @@
 """Binary verbalizer RAG baseline for one-year mortality prediction.
 
-Same verbalizer protocol as baselines/zeroshot/run_zeroshot_verbalizer.py —
+Same verbalizer protocol as baselines/full_context/run_full_context_verbalizer.py —
 assistant-turn prefill with "Answer: " so the first generated token is at the
 Yes/No decision position, then extract softmax-normalized P(Yes) from the
 position-0 token logprobs.

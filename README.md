@@ -25,14 +25,14 @@ scripts/                   Runnable entrypoints
     vectordb4notes.py             Build LanceDB note vector index
     vectordb4ICD_byPatients.py    Build LanceDB ICD code vector index
     convert_lancedb_to_parquet.py
-    build_zeroshot_dataset.py     Build zeroshot LLM baseline input
+    build_full_context_dataset.py Build full-context LLM baseline input
     build_rag_dataset.py          Build RAG baseline input (8 mortality-risk queries)
     build_notes_only_inputs.py    Notes-only ablation
     compute_bootstrap_metrics.py  Bootstrap CIs + pairwise significance
     (PSRM typed-report eval + selection scripts)
 
 baselines/
-    zeroshot/         vLLM zeroshot LLM (Llama-3.1) + verbalizer variants
+    full_context/     vLLM full-context LLM (Llama-3.1) + verbalizer variants
     rag/              RAG baseline (top-k retrieval over 8 risk queries)
     text_encoder/     Text-only LLM baseline (no embeddings)
     qlora_verbalizer/ QLoRA fine-tuned verbalizer
@@ -103,14 +103,14 @@ All baselines share the same train/val/test subject split as EviGen. Build
 their inputs first:
 
 ```bash
-python scripts/build_zeroshot_dataset.py   # zeroshot + text_encoder
+python scripts/build_full_context_dataset.py   # full-context + text_encoder
 python scripts/build_rag_dataset.py        # rag
 ```
 
 Then run any baseline directly, e.g.:
 
 ```bash
-python baselines/zeroshot/run_zeroshot.py
+python baselines/full_context/run_full_context.py
 python baselines/rag/run_rag.py
 python baselines/qlora_verbalizer/train_qlora.py
 ```

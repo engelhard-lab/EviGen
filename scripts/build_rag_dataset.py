@@ -1,6 +1,6 @@
 """Build the RAG baseline per-patient input dataset for the test split.
 
-For every test subject (same canonical split as zeroshot), this script:
+For every test subject (same canonical split as full_context), this script:
 1. Embeds 8 hand-crafted mortality-risk queries with Qwen3-Embedding-8B
 2. Preloads all note/code embeddings + metadata from LanceDB into memory
 3. For each patient, computes cosine similarity to find top-K per query
@@ -358,26 +358,26 @@ def main():
                         help="LanceDB directory")
     parser.add_argument("--note-table", type=str, default="death_age_chunksize200_qwen")
     parser.add_argument("--code-table", type=str, default="death_age_codes_qwen")
-    parser.add_argument("--zeroshot-jsonl", type=str,
-                        default="data/zeroshot_test_patients.jsonl",
-                        help="Zeroshot JSONL to get subject_ids, labels, and approx_tokens "
+    parser.add_argument("--full_context-jsonl", type=str,
+                        default="data/full_context_test_patients.jsonl",
+                        help="Full-context JSONL to get subject_ids, labels, and approx_tokens "
                              "(ignored when --splits is given)")
     parser.add_argument("--output", type=str, default="data/rag_test_patients.jsonl",
                         help="Output JSONL path (ignored when --splits is given)")
     parser.add_argument("--splits", type=str, default=None,
                         help="Comma-separated list of splits (train,val,test) to build "
                              "in one shot, reusing a single LanceDB preload. "
-                             "Inputs derived from data/zeroshot_{split}_patients.jsonl, "
+                             "Inputs derived from data/full_context_{split}_patients.jsonl, "
                              "outputs written to data/rag_{split}_patients.jsonl. "
-                             "Overrides --zeroshot-jsonl/--output when given.")
+                             "Overrides --full_context-jsonl/--output when given.")
     parser.add_argument("--data-dir", type=str, default="data",
-                        help="Directory to look for zeroshot JSONLs and write RAG JSONLs "
+                        help="Directory to look for full_context JSONLs and write RAG JSONLs "
                              "when --splits is given")
     parser.add_argument("--k-per-query", type=int, default=4,
                         help="Top-K chunks to retrieve per query (default: 4)")
     args = parser.parse_args()
 
-    # Assemble list of (split_name, zeroshot_jsonl, output_path) jobs
+    # Assemble list of (split_name, full_context_jsonl, output_path) jobs
     if args.splits:
         split_list = [s.strip() for s in args.splits.split(",") if s.strip()]
         valid = {"train", "val", "test"}
@@ -387,12 +387,12 @@ def main():
         data_dir = Path(args.data_dir)
         split_jobs = [
             (s,
-             data_dir / f"zeroshot_{s}_patients.jsonl",
+             data_dir / f"full_context_{s}_patients.jsonl",
              data_dir / f"rag_{s}_patients.jsonl")
             for s in split_list
         ]
     else:
-        split_jobs = [(None, Path(args.zeroshot_jsonl), Path(args.output))]
+        split_jobs = [(None, Path(args.full_context_jsonl), Path(args.output))]
 
     # Ensure all output directories exist early
     for _, _, out_path in split_jobs:
@@ -411,7 +411,7 @@ def main():
                 patients.append({
                     "subject_id": int(rec["subject_id"]),
                     "label": float(rec["label"]),
-                    "zeroshot_approx_tokens": int(rec.get("approx_tokens", 0)),
+                    "full_context_approx_tokens": int(rec.get("approx_tokens", 0)),
                 })
         sids = [p["subject_id"] for p in patients]
         all_sids.update(sids)
@@ -486,7 +486,7 @@ def main():
                     "num_notes": len(note_results),
                     "num_codes": len(code_results),
                     "approx_tokens": approx_tokens,
-                    "zeroshot_approx_tokens": pat["zeroshot_approx_tokens"],
+                    "full_context_approx_tokens": pat["full_context_approx_tokens"],
                     "k_per_query": k,
                 }
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")

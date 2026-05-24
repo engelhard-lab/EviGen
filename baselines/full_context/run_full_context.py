@@ -1,7 +1,7 @@
-"""Zeroshot LLM baseline for one-year mortality prediction.
+"""Full-context LLM baseline for one-year mortality prediction.
 
-Consumes data/zeroshot_test_patients.jsonl (produced by
-scripts/build_zeroshot_dataset.py) and, for each patient, asks
+Consumes data/full_context_test_patients.jsonl (produced by
+scripts/build_full_context_dataset.py) and, for each patient, asks
 Llama-3.1-8B-Instruct to return a STRICT JSON object with a risk probability
 and an evidence summary. Uses vLLM for batched GPU inference.
 
@@ -9,7 +9,7 @@ Truncation policy (when the tokenized prompt exceeds --max-input-tokens):
     drop clinical notes from the OLDEST end until the prompt fits. The ICD
     code list is always preserved in full and the most-recent note is kept.
 
-Writes outputs/zeroshot/predictions[_suffix].jsonl with one row per patient.
+Writes outputs/full_context/predictions[_suffix].jsonl with one row per patient.
 """
 
 import argparse
@@ -313,7 +313,7 @@ def parse_completion(text: str):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=str, required=True,
-                        help="Path to zeroshot_test_patients.jsonl")
+                        help="Path to full_context_test_patients.jsonl")
     parser.add_argument("--output", type=str, required=True,
                         help="Path to write predictions JSONL")
     parser.add_argument("--model-id", type=str,

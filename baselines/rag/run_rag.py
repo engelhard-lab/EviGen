@@ -5,7 +5,7 @@ scripts/build_rag_dataset.py) and, for each patient, asks
 Llama-3.1 to return a STRICT JSON object with a risk probability
 and an evidence summary. Uses vLLM for batched GPU inference.
 
-This script is identical to baselines/zeroshot/run_zeroshot.py except
+This script is identical to baselines/full_context/run_full_context.py except
 for the system and user prompts, which reference "retrieved clinical
 evidence" instead of "complete clinical history".
 

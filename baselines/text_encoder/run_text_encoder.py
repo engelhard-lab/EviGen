@@ -4,7 +4,7 @@ Supported backbones (select via --model):
   - modernbert:  answerdotai/ModernBERT-base  (8192 tokens)
   - longformer:  allenai/longformer-base-4096 (4096 tokens, global attn on CLS)
 
-Loads per-split JSONL produced by scripts/build_zeroshot_dataset.py (fields:
+Loads per-split JSONL produced by scripts/build_full_context_dataset.py (fields:
 subject_id, label, patient_text), full fine-tunes the backbone + 1-logit
 classification head, tracks val AUC with early stopping, writes
 test_predictions.jsonl in the standard per-subject schema.

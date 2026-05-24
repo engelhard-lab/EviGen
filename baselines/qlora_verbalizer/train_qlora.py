@@ -5,7 +5,7 @@ prefill "Answer: ". All preceding positions are masked with -100.
 
 Two variants sharing this script:
   --variant rag  : uses baselines.rag.run_rag_verbalizer (short context ~3K)
-  --variant full : uses baselines.zeroshot.run_zeroshot_verbalizer (full history,
+  --variant full : uses baselines.full_context.run_full_context_verbalizer (full history,
                    note-aware left-truncation to --max-seq-len, recency-biased)
 
 Designed for torchrun --nproc_per_node=2 on a single node (DDP). Rank 0 owns
@@ -69,9 +69,9 @@ def load_variant_module(variant: str, verbalizer_style: str = "yesno"):
         verb_name = "run_rag_verbalizer"
         free_name = "run_rag"
     elif variant == "full":
-        subdir = REPO_ROOT / "baselines" / "zeroshot"
-        verb_name = "run_zeroshot_verbalizer"
-        free_name = "run_zeroshot"
+        subdir = REPO_ROOT / "baselines" / "full_context"
+        verb_name = "run_full_context_verbalizer"
+        free_name = "run_full_context"
     else:
         raise ValueError(f"Unknown variant={variant!r}")
 

@@ -4,9 +4,9 @@ review patients that ``scripts/export_review_pairs.py`` produced.
 For each subject_id in ``clinical_reports_for_review/`` (derived from the
 existing ``<sid>_evigen.txt`` files), writes:
 
-* ``<sid>_zeroshot_holistic.txt`` — gpt-4o-mini, full history, holistic
+* ``<sid>_full_context_holistic.txt`` — gpt-4o-mini, full history, holistic
   3-section narrative (no factor-by-factor, no citations). Source:
-  ``outputs/zeroshot/predictions_mini_holistic.jsonl``.
+  ``outputs/full_context/predictions_mini_holistic.jsonl``.
 
 * ``<sid>_iris_raw.txt`` — deterministic extraction of the EviGen
   predicted probability + top-5 attributed retrieved items (full chunk text,
@@ -27,7 +27,7 @@ from evigen_dynamicquery.generate_gold_outputs import strip_chunk_prefix
 
 
 REVIEW_DIR = REPO / "clinical_reports_for_review"
-HOLISTIC_PREDS = REPO / "outputs/zeroshot/predictions_mini_holistic.jsonl"
+HOLISTIC_PREDS = REPO / "outputs/full_context/predictions_mini_holistic.jsonl"
 EVIGEN_EXPLANATIONS = REPO / "outputs/test_explanations.json"
 
 
@@ -126,7 +126,7 @@ def main() -> int:
 
     n_h = n_i = 0
     for sid in sids:
-        (REVIEW_DIR / f"{sid}_zeroshot_holistic.txt").write_text(
+        (REVIEW_DIR / f"{sid}_full_context_holistic.txt").write_text(
             render_holistic(holistic_by_sid[sid])
         )
         n_h += 1
@@ -135,7 +135,7 @@ def main() -> int:
         )
         n_i += 1
 
-    print(f"wrote {n_h} _zeroshot_holistic.txt and {n_i} _iris_raw.txt files "
+    print(f"wrote {n_h} _full_context_holistic.txt and {n_i} _iris_raw.txt files "
           f"to {REVIEW_DIR}")
     return 0
 

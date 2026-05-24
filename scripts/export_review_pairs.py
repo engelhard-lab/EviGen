@@ -2,13 +2,13 @@
 for each, two clinical reports side-by-side:
 
   clinical_reports_for_review/<sid>_evigen.txt           — EviGen mini T=0.0 + PSRM-typed annotations
-  clinical_reports_for_review/<sid>_zeroshot_factors.txt — full-history zero-shot mini parsed_report
+  clinical_reports_for_review/<sid>_full_context_factors.txt — full-history full-context mini parsed_report
                                                             (factor-by-factor / 4-section format)
 
-Also runs the same 4-section / 5-factor format check on the zeroshot reports
+Also runs the same 4-section / 5-factor format check on the full_context reports
 to confirm format consistency.
 
-The two addendum baselines (<sid>_zeroshot_holistic.txt and <sid>_iris_raw.txt)
+The two addendum baselines (<sid>_full_context_holistic.txt and <sid>_iris_raw.txt)
 are emitted by scripts/export_review_pairs_addendum.py.
 """
 
@@ -37,7 +37,7 @@ SECTION_HEADERS = [
 
 def check_format(text: str, require_attribution: bool = True) -> tuple[bool, list[str]]:
     """4-section + 5-factor anatomy check. Attribution score lines are
-    EviGen-only; pass require_attribution=False for zero-shot reports."""
+    EviGen-only; pass require_attribution=False for full-context reports."""
     failures: list[str] = []
     last_idx = -1
     for sh in SECTION_HEADERS:
@@ -65,30 +65,30 @@ def main() -> int:
     repo = Path("/hpc/group/engelhardlab/fl105/IRIS-extended/EviGen-DynamicQuery")
     coherent_path = repo / "outputs/psrm_typed/selected_subject_ids_coherent.json"
     typed_per_pat_path = repo / "outputs/psrm_typed/typed_reports_per_patient.json"
-    zeroshot_path = repo / "outputs/zeroshot/predictions_mini_full.jsonl"
+    full_context_path = repo / "outputs/full_context/predictions_mini_full.jsonl"
     out_dir = repo / "clinical_reports_for_review"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     coherent = json.loads(coherent_path.read_text())["subject_ids"]
     typed_by_sid = json.loads(typed_per_pat_path.read_text())
-    zeroshot_by_sid: dict[int, dict] = {}
-    for line in zeroshot_path.open():
+    full_context_by_sid: dict[int, dict] = {}
+    for line in full_context_path.open():
         r = json.loads(line)
-        zeroshot_by_sid[int(r["subject_id"])] = r
+        full_context_by_sid[int(r["subject_id"])] = r
 
-    # Pre-filter: only keep coherent sids whose zeroshot ALSO passes format.
+    # Pre-filter: only keep coherent sids whose full_context ALSO passes format.
     eligible: list[int] = []
     excluded_for_format: list[tuple[int, list[str]]] = []
     for sid in coherent:
-        ok, f = check_format(zeroshot_by_sid[sid]["parsed_report"],
+        ok, f = check_format(full_context_by_sid[sid]["parsed_report"],
                              require_attribution=False)
         if ok:
             eligible.append(sid)
         else:
             excluded_for_format.append((sid, f))
     print(f"coherent total: {len(coherent)}; "
-          f"zeroshot format-pass eligible: {len(eligible)}; "
-          f"excluded for zeroshot format: {len(excluded_for_format)}")
+          f"full_context format-pass eligible: {len(eligible)}; "
+          f"excluded for full_context format: {len(excluded_for_format)}")
 
     # Clear stale files from previous runs before writing the fresh sample.
     for old in out_dir.glob("*.txt"):
@@ -105,14 +105,14 @@ def main() -> int:
     failures_zs: list[tuple[int, list[str]]] = []
     for sid in sample:
         ev = typed_by_sid[str(sid)]
-        zs_row = zeroshot_by_sid[sid]
+        zs_row = full_context_by_sid[sid]
         zs = zs_row["parsed_report"]
         ev_path = out_dir / f"{sid}_evigen.txt"
-        zs_path = out_dir / f"{sid}_zeroshot_factors.txt"
+        zs_path = out_dir / f"{sid}_full_context_factors.txt"
         ev_path.write_text(ev)
-        # Add a small header so the zeroshot file is identifiable.
+        # Add a small header so the full_context file is identifiable.
         zs_path.write_text(
-            f"# Zero-shot gpt-4o-mini, full history (notes+codes), "
+            f"# Full-context gpt-4o-mini, full history (notes+codes), "
             f"factor-by-factor 4-section / 5-factor format\n"
             f"# subject_id: {sid}    label: {zs_row['label']}    "
             f"parsed_probability: {zs_row['parsed_probability']}\n\n"
@@ -125,25 +125,25 @@ def main() -> int:
             failures_zs.append((sid, fails))
 
     print(f"wrote {2 * len(sample)} files to {out_dir}")
-    print(f"zeroshot format pass: {n_pass_zs}/{len(sample)}")
+    print(f"full_context format pass: {n_pass_zs}/{len(sample)}")
     if failures_zs:
-        print("zeroshot failures:")
+        print("full_context failures:")
         for sid, fails in failures_zs:
             print(f"  {sid}: {fails}")
     # Manifest
     manifest = {
         "source_coherent_set": str(coherent_path),
         "n_coherent_total": len(coherent),
-        "n_zeroshot_format_pass_in_coherent": len(eligible),
-        "n_excluded_for_zeroshot_format": len(excluded_for_format),
-        "excluded_for_zeroshot_format": [
+        "n_full_context_format_pass_in_coherent": len(eligible),
+        "n_excluded_for_full_context_format": len(excluded_for_format),
+        "excluded_for_full_context_format": [
             {"sid": s, "failures": f} for s, f in excluded_for_format
         ],
         "seed": 42,
         "n_sampled": len(sample),
         "subject_ids": sample,
-        "zeroshot_format_pass_in_sample": n_pass_zs,
-        "zeroshot_failures_in_sample": [{"sid": s, "failures": f}
+        "full_context_format_pass_in_sample": n_pass_zs,
+        "full_context_failures_in_sample": [{"sid": s, "failures": f}
                                        for s, f in failures_zs],
     }
     (out_dir / "MANIFEST.json").write_text(json.dumps(manifest, indent=2))

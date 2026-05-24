@@ -1,5 +1,5 @@
 """Run a EviGen checkpoint over the test split and emit per-subject
-probabilities to JSONL, so we can join with the zeroshot predictions and
+probabilities to JSONL, so we can join with the full_context predictions and
 plot per-bin AUC/Acc.
 """
 import argparse

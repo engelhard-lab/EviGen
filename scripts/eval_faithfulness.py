@@ -46,7 +46,7 @@ _QUOTE_STRIP = '"\'`“”‘’ \t'
 #   "Patient age: 70 years Clinical Note: ..."    ← canonical form
 # and we strip leading/trailing "..." elision markers (these are LLM
 # editing marks, not part of the source text). Affects all RAG and EviGen
-# baselines (whose inputs come from the chunk parquet); zeroshot is
+# baselines (whose inputs come from the chunk parquet); full_context is
 # unaffected because it pulls full notes from the CSV.
 _CHUNK_PREFIX_RE = re.compile(
     r"^patient age:\s*\d+\s*years\s*(?:\.{2,}\s*)?(?:clinical note:\s*)?(?:\.{2,}\s*)?",
@@ -179,7 +179,7 @@ def _extract_report_value(text: str) -> str | None:
 def unwrap_report(parsed_report: Any) -> str | None:
     """Handle the 4 format variants observed across the 8 prediction files.
 
-    - Plain text (zeroshot/rag *_70b_full): return as-is.
+    - Plain text (full_context/rag *_70b_full): return as-is.
     - JSON-wrapped string (verbalizer variants; contains unescaped raw
       newlines inside the "report" string → json.loads fails): scan manually.
     - Dict: take .report.
@@ -612,8 +612,8 @@ def process_prediction_file(
 
 
 def baseline_name_from_path(p: Path) -> str:
-    """outputs/zeroshot/predictions_70b_full.jsonl -> zeroshot_70b_full"""
-    parent = p.parent.name  # zeroshot | rag
+    """outputs/full_context/predictions_70b_full.jsonl -> full_context_70b_full"""
+    parent = p.parent.name  # full_context | rag
     stem = p.stem  # predictions_70b_full
     stem = stem.removeprefix("predictions_")
     return f"{parent}_{stem}"
